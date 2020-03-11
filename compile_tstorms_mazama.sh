@@ -10,17 +10,19 @@ module unuse /usr/local/modulefiles
 #
 module load intel/19.1.0.166
 #
+TARGET_PATH_ROOT=/share/cees/software
+#
 # Choose your MPI:
-# (this appears to compile all three components -- on Mazama, for OpenMPI-3, MPICH/3, and impi/2019)
+# (this appears to compile correctly -- on Mazama, for OpenMPI-3, MPICH/3, and impi/2019)
 #module load impi/
-#TARGET_PATH_ROOT=/scratch/myoder96/.local/intel/19.1.0.166/impi/2019.6.166
-#module load openmpi3
-#TARGET_PATH_ROOT=/scratch/myoder96/.local/intel_19_1_0_166/openmpi3
+#COMP_MPI=intel19_impi19
+#
+#module load openmpi3=
+#COMP_MPI=intel19_openmpi3
 #
 module load mpich/3.3.1
-## TARGET_PATH_ROOT=/scratch/myoder96/.local/intel/19.1.0.166/mpich/3.3.1
-TARGET_PATH_ROOT=/scratch/myoder96/.local/intel_19_1_0_166/mpich_3_3_1
-
+#TARGET_PATH_ROOT=/scratch/myoder96/.local/intel_19_1_0_166_mpich_3_3_1
+COMP_MPI=intel19_mpich3
 #
 module load netcdf
 module load netcdf-fortran
@@ -54,13 +56,14 @@ echo "root dir: ${ROOT_DIR}"
 #
 ###############################################
 # Which parts do we do?
-DO_HDF4=1
-DO_NCO=1
+# TODO: separate these installations? Manage HDF4, NCO separately? Maybe for now, we create the NCO, HDF4 SW and reference
+#  this script; parse it out later, if the time comes that we need to do that?
+DO_HDF4=0
+DO_NCO=0
 DO_TSTORMS=1
 ###############################################
 #
 #
-#NCO=nco-4.9.1
 NCO=nco-4.9.2
 HDF4=hdf-4.2.14
 ANTLR=antlr4-cpp-runtime-4.8
@@ -71,9 +74,14 @@ NCO_SRC=${ROOT_DIR}/${NCO}
 HDF4_SRC=${ROOT_DIR}/${HDF4}
 TSTORMS_SRC=${ROOT_DIR}/${TSTORMS}
 #
-NCO_DIR=${TARGET_PATH_ROOT}/${NCO}
-HDF4_DIR=${TARGET_PATH_ROOT}/${HDF4}
-TSTORMS_DIR=${TSTORMS_SRC}
+#NCO_DIR=${TARGET_PATH_ROOT}/${NCO}
+#HDF4_DIR=${TARGET_PATH_ROOT}/${HDF4}
+#TSTORMS_DIR=${TSTORMS_SRC}
+#TSTORMS_DIR=${TARGET_PATH_ROOT}/tstorms/${COMP_MPI}/1.0.0
+
+NCO_DIR=${TARGET_PATH_ROOT}/nco/${COMP_MPI}/4.9.2
+HDF4_DIR=${TARGET_PATH_ROOT}/hdf4/${COMP_MPI}/4.2.14
+TSTORMS_DIR=${TARGET_PATH_ROOT}/tstorms/${COMP_MPI}/1.0.0
 #
 export LD_LIBRARY_PATH=${NCO_DIR}/lib:${LD_LIBRARY_PATH}
 export LIBRARY_PATH=${NCO_DIR}/lib:${LIBRARY_PATH}
@@ -218,10 +226,16 @@ if [[ ${DO_TSTORMS} -eq 1 ]]; then
     fi
     #
     if [ -d "${TSTORMS_SRC}" ]; then
-        echo "TSTORMS_DIR exists: ${TSTORMS}"
+        echo "TSTORMS_SRC exists: ${TSTORMS_SRC}"
     else
         # this would be the place to nest the if-file bit...
         tar xfvz ${TSTORMS_TAR}
+    fi
+    #
+    if [ -d "${TSTORMS_DIR}" ]; then
+        echo "TSTORMS_DIR exists: " ${TSTORMS_DIR}
+    else
+        mkdir -p ${TSTORMS_DIR}
     fi
     #
     # now, do the installing:
@@ -260,6 +274,8 @@ if [[ ${DO_TSTORMS} -eq 1 ]]; then
     make clean
     make
     # cd ${TSTORMS}/trajectory_analysis
+    #
+    cp -rf ${TSTORMS_SRC}  ${TSTORMS_DIR}/
 fi
 #
 
