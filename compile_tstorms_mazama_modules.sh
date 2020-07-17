@@ -11,16 +11,21 @@ module unuse /usr/local/modulefiles
 #MOD_COMPILER="gnu/8"
 #COMP="gnu8"
 #
-module load intel/19
+MOD_COMPILER="intel/19"
+COMP_PREREQ="intel/19.1.0.166"
 COMP="intel19"
 
-MOD_MPI="mpich_3/"
-MPI=mpich3
+#MOD_MPI="mpich_3/"
+#MPI_PREREQ="mpich/3.3.1"
+#MPI=mpich3
 
-#MOD_MPI="openmpi_3/"
-#MPI="openmpi3"
-#MOD_MPI="impi_19/"
-#MPI="impi19"
+MOD_MPI="openmpi_3/"
+MPI="openmpi3"
+MPI_PREREQ="openmpi_3/3.1.4"
+
+MOD_MPI="impi_19/"
+MPI="impi19"
+MPI_PREREQ="impi_19/19.1.0.166"
 #
 # NOTE: At this time, the Makefile and/or mkmf template are specifically configured for ifort (and other intel things), and there is not a Cmake or ./configure
 #  config., so the gnu compiler breaks on bad options. so for now, let's just skip gnu compiling.
@@ -183,6 +188,7 @@ make
 #
 cp -rf ${TSTORMS_SRC}  ${TSTORMS_DIR}/
 #
+#################
 # now, write a module:
 echo "Write module to: ${MODULE_PATH}/${VER}.lua"
 if [[ ! -d ${MODULE_PATH} ]]; then mkdir -p ${MODULE_PATH} ; fi
@@ -190,8 +196,8 @@ if [[ ! -d ${MODULE_PATH} ]]; then mkdir -p ${MODULE_PATH} ; fi
 cat > ${MODULE_PATH}/${VER}.lua <<EOF
 -- -*- lua -*-
 --
-prereq("${MOD_COMPILER}")
-prereq("${MOD_MPI}")
+prereq("${COMP_PREREQ}")
+prereq("${MPI_PREREQ}")
 --
 depends_on("netcdf")
 depends_on("netcdf-fortran")
@@ -202,7 +208,7 @@ depends_on("nco/")
 whatis("TSTORMS SW package, built on the ${COMP} - ${MPI} toolchhain.")
 --
 --
-TSTORMS_DIR = "${TSTORMS_DIR}"
+TSTORMS_DIR = "${TSTORMS_DIR}/tropical_storms_pub_v1_1"
 TSTORMS_TRAJECTORY_DIR =  pathJoin(TSTORMS_DIR, 'trajectory_analysis')
 TSTORMS_DRIVER_DIR = pathJoin(TSTORMS_DIR, 'tstorms_driver')
 --
