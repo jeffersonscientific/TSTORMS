@@ -9,20 +9,23 @@ module purge
 module unuse /usr/local/modulefiles
 #
 module load intel/19.1.0.166
+COMP=intel19
 #
-TARGET_PATH_ROOT=/share/cees/software
-#
+# NOTE: This was the original development script, but has been replaced by
+#   compile_tstorms_mazama_modules.sh, which uses LMOD modules to set the various
+#   paths, env. variables, etc.
 # Choose your MPI:
 # (this appears to compile correctly -- on Mazama, for OpenMPI-3, MPICH/3, and impi/2019)
-#module load impi/
-#COMP_MPI=intel19_impi19
+module load impi/
+MPI=impi19
 #
 #module load openmpi3=
-#COMP_MPI=intel19_openmpi3
+#MPI=openmpi3
 #
-module load mpich/3.3.1
-#TARGET_PATH_ROOT=/scratch/myoder96/.local/intel_19_1_0_166_mpich_3_3_1
-COMP_MPI=intel19_mpich3
+#module load mpich/3.3.1
+#MPI=mpich3
+#
+COMP_MPI=${COMP}_${MPI}
 #
 module load netcdf
 module load netcdf-fortran
@@ -48,6 +51,8 @@ MPICC=mpiicc
 MPIFC=mpiifort
 MPICXX=mpiicpc
 #
+#
+TARGET_PATH_ROOT=/share/cees/software
 ROOT_DIR=`pwd`
 echo "root dir: ${ROOT_DIR}"
 #
