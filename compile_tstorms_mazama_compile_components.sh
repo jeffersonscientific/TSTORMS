@@ -14,6 +14,10 @@ COMP=intel19
 # NOTE: This was the original development script, but has been replaced by
 #   compile_tstorms_mazama_modules.sh, which uses LMOD modules to set the various
 #   paths, env. variables, etc.
+#  Generally, you should probalby try to use a system's LMOD (or similar) module system to install and
+#    manage dependencies. This script can still be used as a template to script compilation of the
+#    dependencies. This document will probably not be maintained very well...
+#
 # Choose your MPI:
 # (this appears to compile correctly -- on Mazama, for OpenMPI-3, MPICH/3, and impi/2019)
 module load impi/

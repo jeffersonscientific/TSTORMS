@@ -37,25 +37,23 @@ module load ${MOD_MPI}
 COMP_MPI=${COMP}_${MPI}
 ###################
 #
-module load netcdf
-module load netcdf-fortran
-
-# share modules:
-#module load hdf4
+module load netcdf/
+module load netcdf-fortran/
 module load nco
 #
 module load autotools
-#module load cmake
 #
 echo "module list: "
 module list
 #
-
-#
+CC=${MPICC}
+CXX=${MPICXX}
+LD=${FC}
+FC=${MPIFC}
 #
 # set this to your prefered path:
-TARGET_PATH_ROOT="/share/cees/software"
-#TARGET_PATH_ROOT=${SCRATCH}/.local
+#TARGET_PATH_ROOT="/share/cees/software"
+TARGET_PATH_ROOT=${SCRATCH}/.local/jss
 #TARGET_PATH_ROOT=`pwd`/.local
 
 ROOT_DIR=`pwd`
@@ -70,13 +68,11 @@ echo "root dir: ${ROOT_DIR}"
 #  nominlaly in the event that we want to port this to a different system.
 # TODO: separate these installations? Manage HDF4, NCO separately? Maybe for now, we create the NCO, HDF4 SW and reference
 #  this script; parse it out later, if the time comes that we need to do that?
-DO_HDF4=0
-DO_NCO=0
 DO_TSTORMS=1
+DO_MODULE=0
 ###############################################
 #
-#TSTORMS="tropical_storms_pub"
-TSTORMS="tropical_storms_pub_v1_1"
+TSTORMS="tropical_storms_pub"
 TSTORMS_TAR="TSTORMS.tar.gz"
 TSTORMS_SRC="${ROOT_DIR}/${TSTORMS}"
 #VER="1.0.0"
@@ -86,31 +82,18 @@ VER="1.1.0"
 TSTORMS_DIR=${TARGET_PATH_ROOT}/tstorms/${COMP_MPI}/${VER}
 MODULE_PATH="/share/cees/modules/moduledeps/${COMP}-${MPI}/tstorms"
 #
-export LD_LIBRARY_PATH=${NCO_DIR}/lib:${LD_LIBRARY_PATH}
-export LIBRARY_PATH=${NCO_DIR}/lib:${LIBRARY_PATH}
-export PATH=${NCO_DIR}/bin:${PATH}
-#
-C_FLAGS='-fpic '
+C_FLAGS="-fpic `nc-config --cflags` -I${MPI_DIR}/include "
 #CPP_FLAGS="-I${HDF5_INC} "
-CPP_FLAGS="`nc-config --cflags` -I${MPI_DIR}/include"
+#CPP_FLAGS="`nc-config --cflags` -I${MPI_DIR}/include"
 #echo "** ** ** CPP_FLAGS: ${CPP_FLAGS}"
 #
-# FUNFACT: Turns out that `nf-config --fflags` is (sometimes?) disabled for "cmake", which amounts
-#   to for a bunch of other stuff too, like just running it in a script, like this:
-#  this returns a message "not enabled for cmake" or something, which obviously makes
-#  everything break. For what reason, I do not know...
-#FFLAGS="-fpic `nf-config --fflags` "
-FFLAGS="-fpic -I${NETCDF_FORTRAN_INC} "
+export FFLAGS=" -fpic $(nf-config --fflags) $(nc-config --fflags) -fp-model strict -stack_temps -safe_cray_ptr -ftz -assume byterecl -g -i4 -r8 -O2 -nowarn -Wp,-w "
+#
 echo "** * * ** FFLAGS: ${FFLAGS}"
 
 #
-# TODO: LD_FLAGS should be set for each compile group.g
-#LD_FLAGS="`nc-config --libs` -L${NCF_DIR}/lib -L${ZDIR}/lib -L${CURLDIR}/lib -L${H5DIR}/lib "
-LD_FLAGS="`nc-config --libs` `nc-config --flibs`  -L${HDF5_LIB} -L${MPI_DIR}/lib"
-echo "*** LD_FLAGS: ${LD_FLAGS}"
-#
-#LIBS="-lnetcdf `nf-config --flibs` "
-#
+export LDFLAGS=" $(nc-config --flibs) $(nc-config --libs)  -L${HDF5_LIB} -L${MPI_DIR}/lib "
+echo "*** LD_FLAGS: ${LDFLAGS}"
 #
 # Also ANTLR? this will (apparently?) only compile with gnu compiler... dunno, but it also only appears to have c/c++ components, so
 #  that is probably ok. also, might be able to just do a pip install, for the Python hooks, and maybe get the c++ bits (or at lest
@@ -152,26 +135,10 @@ echo "do the installing to: ${TSTORMS_DIR}"
 #
 export FC=$FC
 export LD=$LD
-#echo "*** NETCDF: ${NETCDF_FORTRAN_DIR}"
-#export NETCDF_FFLAGS="-I${NETCDF_FORTRAN_DIR}/include -I${NETCDF_FORTRAN_DIR}/lib "
-#BOOGER="`nc-config --fflags` -I. -I${NCO_DIR}/include -I/usr/local/include -I/usr/include -fltconsistency -stancck_temps -safe_cray_ptr -ftz -i_dynamic -assume byterecl -g -i4 -r8 -O2 -nowarn -Wp,-w"
-#export FFLAGS=${BOOGER}
-#echo "** ** ** ${FFLAGS}"
-#echo "** *** ** `nc-config --fflags`"
-#export LDFLAGS="-limf -lm -lpthread -L${NCO_DIR}/lib -L." `nc-config --flibs`
-# so... we get a linking error, cannot find -limf.
-#  libimf appears here:
-# /opt/ohpc/pub/intel/compilers_and_libraries_2020.0.166/linux/compiler/lib/intel64_lin/libimf.so
-# which we should be picking up from the module load intel/19...  but let's specify that (see make_templete_tstorms_mazama) -L and see how we go.
-
-#echo "*** FFLAGS: ${FFLAGS}"
-#echo "*** LDFLAGS: ${LDFLAGS}"
-
 #
 cd ${TSTORMS_SRC}/tstorms_driver
 echo "doing make for tstorms_driver:: `pwd` "
-#make Makefile_compscript clean
-#make Makefile_compscript
+#
 make clean
 make
 #
@@ -180,16 +147,15 @@ echo " ** **"
 echo "  ***"
 cd ${TSTORMS_SRC}/trajectory_analysis
 echo "doing make for trajectory_analysis:: `pwd` "
-#make Makefile_compscript clean
-#make Makefile_compscript
+#
 make clean
 make
-# cd ${TSTORMS}/trajectory_analysis
 #
 cp -rf ${TSTORMS_SRC}  ${TSTORMS_DIR}/
 #
 #################
 # now, write a module:
+if [[ ${DO_MODULE} -eq 1 ]]; then
 echo "Write module to: ${MODULE_PATH}/${VER}.lua"
 if [[ ! -d ${MODULE_PATH} ]]; then mkdir -p ${MODULE_PATH} ; fi
 #
@@ -224,4 +190,4 @@ prepend_path("PATH", TSTORMS_DRIVER_DIR)
 
 EOF
 #
-
+fi

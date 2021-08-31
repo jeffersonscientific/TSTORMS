@@ -3,6 +3,13 @@
 # principal author: Mark R. Yoder, Ph.D.
 #                   mryoder@stanford.edu
 #
+# This can be looked at as a template... to use this template strategy for compiling.
+#. the idea is to have a simple Makefile, then use at template like this for each compute
+#. environment to fill in all the variables. The problem is that it does not load modules and
+#. do other things, so since it can't do the whole job, we end up with a three document compile
+# system; it's easier to just put all of this into the compile script.
+#. So, this will be left here as an example of how things are done, but we won't import it.
+#
 # Moudle scripts should be setting these as env variables. Can we just not set them?
 #.  there's a bit of a syntax to setting the variables explicitly from the system
 #FC=ifort

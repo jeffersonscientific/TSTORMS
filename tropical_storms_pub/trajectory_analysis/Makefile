@@ -1,5 +1,5 @@
 #include mkmf_template
-include ../make_template_tstorms_mazama
+#include ../make_template_tstorms_mazama
 
 .DEFAULT:
 	-touch $@
