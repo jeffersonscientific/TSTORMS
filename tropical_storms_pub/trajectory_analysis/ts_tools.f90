@@ -20,12 +20,9 @@
   real,    parameter :: hpi =  90.0
 
   character*120 :: &
-!  
-! do we need to point out that this is a bad idea? that hardcoding pahts in code
-! is not portable? A local, relative path should work, for the way these codes
-! are usually deployed. better, of course, would be to add a parameter.
-!landmask = '/home/fms/local/opt/fre-analysis/test/keo/tropical_storms/trajectory_analysis/landsea.map'
-landmask = 'landsea.map'
+! landmask = '/home/fms/local/opt/fre-analysis/test/keo/tropical_storms/trajectory_analysis/landsea.map'
+  landmask = '/data/cees/acb18/tropical_storms_pub/trajectory_analysis/landsea.map'
+! Note that file path is hardcoded and will need to be made flexible for portability. - Adam Burnett, 22 Jul 2019
 
   integer, dimension(ix0,iy0) :: mask0
   integer, dimension(ix, iy ) :: mask
@@ -36,8 +33,8 @@ landmask = 'landsea.map'
 !------------------------------------------------------------------------
 ! --- for latitude bounds
 !------------------------------------------------------------------------
-!miz  real :: nlat =  40.0
-!miz  real :: slat = -40.0
+!miz  real :: nlat =  90.0
+!miz  real :: slat = -90.0
 
 !------------------------------------------------------------------------
 
@@ -89,12 +86,12 @@ landmask = 'landsea.map'
 !--- filter by latitude
     keeper = ( ycyc <= nlat ) .and. ( ycyc >= slat ) 
 
-!--- filter out storms over land
-         jj = ( ycyc - lat0 ) / dlat + 1.5
-         ii = ( xcyc - lon0 ) / dlon + 1.5
-    if ( ii == 0  ) ii = ix
-    if ( ii >  ix ) ii = ii - ix
-    keeper = keeper .and. ( mask(ii,jj) == 0 ) 
+!--- filter out storms over land		- Disabled -- ACB, 30 Sep 2019
+!          jj = ( ycyc - lat0 ) / dlat + 1.5
+!          ii = ( xcyc - lon0 ) / dlon + 1.5
+!     if ( ii == 0  ) ii = ix
+!     if ( ii >  ix ) ii = ii - ix
+!     keeper = keeper .and. ( mask(ii,jj) == 0 ) 
 
 !--- write a record
     if( keeper ) then
@@ -165,9 +162,9 @@ landmask = 'landsea.map'
   data bx /' G','WA','EA','WP','EP','NI','SI','AU','SP','SA','NH','SH'/
 
   character*120 :: &
-! really?
-!  cmask = '/home/fms/local/opt/fre-analysis/test/keo/tropical_storms/trajectory_analysis/imask_2'
-cmask = 'imask_2'
+  ! cmask = '/home/fms/local/opt/fre-analysis/test/keo/tropical_storms/trajectory_analysis/imask_2'
+  cmask = '/data/cees/acb18/tropical_storms_pub/trajectory_analysis/imask_2'
+  ! Note that file path is hardcoded and will need to be made flexible for portability. - Adam Burnett, 22 Jul 2019
 
 !-------------------------------------------------------------------
 

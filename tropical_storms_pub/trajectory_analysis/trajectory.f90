@@ -60,8 +60,8 @@
   real     ::  thick_crit =  50. !miz
   real     :: nwcrit  =   2
   logical  :: do_filt = .true.
-  real     :: nlat =  40. !miz
-  real     :: slat = -40. !miz
+  real     :: nlat =  90. !miz
+  real     :: slat = -90. !miz
   logical  :: do_spline = .false.
   logical  :: do_thickness = .false.
 
